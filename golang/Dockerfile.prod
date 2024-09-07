@@ -1,0 +1,14 @@
+FROM golang:1.23.0-alpine3.20 AS base
+WORKDIR /builder
+RUN apk add upx
+
+ENV CGO_ENABLED=0
+COPY hello.go /builder
+RUN go build -ldflags "-s -w" /builder/hello.go && upx -9 /builder/hello
+
+FROM scratch
+WORKDIR /app
+
+COPY --from=base /builder/hello /app/hello
+
+CMD [ "/app/hello" ]
